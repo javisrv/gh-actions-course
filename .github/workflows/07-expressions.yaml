@@ -1,4 +1,5 @@
 name: 07 - Using Expressions
+run-name: 07 - Using Expressions | DEBUG - ${{ inputs.debug && 'ON' || 'OFF' }}
 on:
     push:
     workflow_dispatch:
@@ -8,6 +9,8 @@ on:
                 required: false
                 type: boolean
                 default: false
+env:
+  MY_VAR_WITH_DEFAULT: ${{ vars.MY_VAR || 'default value' }}
 jobs:
     echo:
         runs-on: ubuntu-latest
