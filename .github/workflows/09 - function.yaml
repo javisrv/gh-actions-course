@@ -11,16 +11,20 @@ jobs:
             - name: Print PR Labels
               run: |
                     cat << EOF
-                     ${{ toJSON(github.event.pull_request.labels) }}"
+                    ${{ toJSON(github.event.pull_request.labels) }}"
+                    EOF
+            - name: Test
+              if: ${{ !cancelled() }}
+              run: echo "test"
             - name: Bug step
               if: ${{ !cancelled() && contains(github.event.pull_request.title, 'fix') }}
               run: echo "This is a bug fix PR"
-            - name: Failing step
-              run: exit 1
-            - name: I Will be skipped
+            #- name: Failing step
+            #  run: exit 1
+            - name: I Will be executed
               if: ${{ success() }}
               run: echo "I will print if previous steps succeed"
-            - name: I Will be executed
+            - name: I Will be skipped
               if: ${{ failure() }}
               run : echo "I will print if previous steps fails"
             - name: I Will exectute
