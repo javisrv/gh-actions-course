@@ -1,0 +1,35 @@
+name: 13 - Using Caching
+on:
+    workflow_dispatch:
+        inputs:
+            use-cache:
+                description: 'Whether to execute cache step'
+                type: boolean
+                default: true
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: 13-caching/react-app
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+            - name: Setup Node
+              uses: actions/setup-node@v3
+              with:
+                  node-version: '20.x'
+            - name: Install Dependencies
+              run: python install_dependencies.py
+            - name: Testing
+              run: python run_tests.py
+            - name: Building
+              run: python build_app.py
+            - name: Deploying to nonprod
+              run: python deploy.py
+
+
+        # 1. Checkout the code
+        # 2. Install dependencies
+        # 3. Linting, formatting, unit testing, building
+        # 4. Deploy to a nonprod environment
