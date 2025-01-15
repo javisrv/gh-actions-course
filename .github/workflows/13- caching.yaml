@@ -1,41 +1,60 @@
 name: 13 - Using Caching
+
 on:
-    workflow_dispatch:
-        inputs:
-            use-cache:
-                description: 'Whether to execute cache step'
-                type: boolean
-                default: true
-            node-version:
-                description: 'Node version'
-                type: choice
-                options:
-                    - '18.x'
-                    - '20.x'
-                    - '21.x'
-                default: '20.x'
+  workflow_dispatch:
+    inputs:
+      use-cache:
+        description: 'Whether to execute cache step'
+        type: boolean
+        default: true
+      python-version:
+        description: 'Python version'
+        type: choice
+        options:
+          - '3.8'
+          - '3.9'
+          - '3.10'
+          - '3.11'
+        default: '3.9'
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
-        defaults:
-            run:
-                working-directory: 13-caching/react-app
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
-            - name: Setup Node
-              uses: actions/setup-node@v3
-              with:
-                  node-version: ${{ inputs.node-version }}
-            - name: Install Dependencies
-              run: python install_dependencies.py
-            - name: Testing
-              run: python run_tests.py
-            - name: Building
-              run: python build_app.py
-            - name: Deploying to nonprod
-              run: python deploy.py
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: 13-caching/react-app
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: Restore Python Dependencies Cache
+        if: ${{ inputs.use-cache }}
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: ~/.cache/pip
+          key: python-deps-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            python-deps-
+
+      - name: Install Dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: python install_dependencies.py
+
+      - name: Run Tests
+        run: python run_tests.py
+
+      - name: Build Application
+        run: python build_app.py
+
+      - name: Deploy to Nonprod
+        run: python deploy.py
+
 
 
         # 1. Checkout the code
