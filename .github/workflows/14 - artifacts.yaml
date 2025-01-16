@@ -44,7 +44,7 @@ jobs:
         - name: Build code
           run: python build_app.py
         - name: Upload build files
-          uses: actions/upload-artifact@v3
+          uses: actions/upload-artifact@v4
           with:
             name: app
             path: 14-artifacts/react-app/build
@@ -53,7 +53,7 @@ jobs:
     needs: test-build
     steps:
         - name: Download build files
-          uses: actions/download-artifact@v3
+          uses: actions/download-artifact@v4
           with:
             name: app
             path: build
