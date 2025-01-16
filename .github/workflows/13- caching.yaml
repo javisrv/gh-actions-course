@@ -18,8 +18,41 @@ on:
         default: '3.9'
 
 jobs:
-  build:
+  install-deps:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: 13-caching/react-app
+    outputs:
+      deps-cache-key: ${{ steps.cache-key.outputs.CACHE_KEY }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: Calculate cache key
+        id: cache-key
+        run: echo "CACHE_KEY=python-deps-${{ hashFiles('**/requirements.txt') }}" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Python Dependencies Cache
+        uses: actions/cache@v3
+        if: ${{ inputs.use-cache }}
+        id: cache
+        with:
+          path: ~/.cache/pip
+          key: ${{ steps.cache-key.outputs.CACHE_KEY }}
+
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: python install_dependencies.py
+
+  lint-test:
+    runs-on: ubuntu-latest
+    needs: install-deps
     defaults:
       run:
         working-directory: 13-caching/react-app
@@ -33,14 +66,12 @@ jobs:
           python-version: ${{ inputs.python-version }}
 
       - name: Restore Python Dependencies Cache
-        if: ${{ inputs.use-cache }}
         uses: actions/cache@v3
+        if: ${{ inputs.use-cache }}
         id: cache
         with:
           path: ~/.cache/pip
-          key: python-deps-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            python-deps-
+          key: ${{ needs.install-deps.outputs.deps-cache-key }} 
 
       - name: Install Dependencies
         if: steps.cache.outputs.cache-hit != 'true'
@@ -49,11 +80,42 @@ jobs:
       - name: Run Tests
         run: python run_tests.py
 
-      - name: Build Application
-        run: python build_app.py
+      - name: Linting
+        run: echo "Linting..."
 
       - name: Deploy to Nonprod
         run: python deploy.py
+  
+  build:
+    runs-on: ubuntu-latest
+    needs: install-deps
+    defaults:
+      run:
+        working-directory: 13-caching/react-app
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: Restore Python Dependencies Cache
+        uses: actions/cache@v3
+        if: ${{ inputs.use-cache }}
+        id: cache
+        with:
+          path: ~/.cache/pip
+          key: ${{ needs.install-deps.outputs.deps-cache-key }} 
+
+      - name: Install Dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: python install_dependencies.py
+
+      - name: Build Application
+        run: python build_app.py
+
 
 
 
