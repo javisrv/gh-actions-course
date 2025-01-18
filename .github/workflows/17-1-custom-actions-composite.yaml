@@ -13,7 +13,7 @@ on:
                     - '3.11'
                 default: '3.9'
 env:
-    working-dir: 17-custom-actions-composite/react-app
+    working-directory: 17-custom-actions-composite/react-app
 jobs:
     build:
         runs-on: ubuntu-latest
