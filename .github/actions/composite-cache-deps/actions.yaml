@@ -1,5 +1,5 @@
 name: Cache Node and NPM dependencies
-description: This action caches Node and NPM dependencies based on the package-lock.json file
+description: This action caches Python dependencies based on the requirements.txt file
 
 inputs:
   python-version:
@@ -31,4 +31,3 @@ runs:
         python -m pip install -r ${{ inputs.working-dir }}/requirements.txt
       shell: bash
       working-directory: ${{ inputs.working-dir }}
-

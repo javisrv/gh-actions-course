@@ -1,0 +1,35 @@
+name: 17 - Custom Actions - Composite
+
+on:
+    workflow_dispatch:
+        inputs:
+            python-version:
+                description: 'Python version'
+                type: choice
+                options:
+                    - '3.8'
+                    - '3.9'
+                    - '3.10'
+                    - '3.11'
+                default: '3.9'
+env:
+    working-dir: 17-custom-actions-composite/react-app
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: ${{ env.working-dir }}
+        steps:
+            - uses: actions/checkout@v4
+            - name: Set up Python and Cache Dependencies
+              uses: ./.github/actions/composite-cache-deps
+              with:
+                python-version: ${{ github.event.inputs.python-version }}
+                working-directory: ${{ env.working-dir }}
+            - name: Install Dependencies
+              run: python install_dependencies.py
+            - name: Run Tests
+              run: python run_tests.py
+            - name: Build Project
+              run: python build_app.py
