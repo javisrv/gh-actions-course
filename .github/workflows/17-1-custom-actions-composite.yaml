@@ -28,8 +28,8 @@ jobs:
                 python-version: ${{ github.event.inputs.python-version }}
                 working-directory: ${{ env.working-dir }}
             - name: Install Dependencies
-              run: python install_dependencies.py
+              run: python ${WORKING_DIR}/install_dependencies.py
             - name: Run Tests
-              run: python run_tests.py
+              run: python ${WORKING_DIR}/run_tests.py
             - name: Build Project
-              run: python build_app.py
+              run: python ${WORKING_DIR}/build_app.py
